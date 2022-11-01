@@ -52,7 +52,7 @@ class FreetCollection {
   }
 
   /**
-   * Get all the freets in by given author
+   * Get all the freets by given author
    *
    * @param {string} username - The username of author of the freets
    * @return {Promise<HydratedDocument<Freet>[]>} - An array of all of the freets
@@ -95,6 +95,16 @@ class FreetCollection {
    */
   static async deleteMany(authorId: Types.ObjectId | string): Promise<void> {
     await FreetModel.deleteMany({authorId});
+  }
+
+  /**
+    * Get all freets authored by a user in a given list of usernames.
+    *
+    * @param {string[]} authors - The users to filter for
+    * @returns {Promise<HydratedDocument<Freet>[]>} - The array of freets matching parameters
+    */
+  static async filterByAuthor(authors: Types.ObjectId[] | string[]): Promise<Array<HydratedDocument<Freet>>> {
+    return FreetModel.find({authorId: {$in: authors}}).sort({dateModified: -1}).populate('authorId');
   }
 }
 

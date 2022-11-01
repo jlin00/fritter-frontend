@@ -5,7 +5,7 @@ import createPersistedState from 'vuex-persistedstate';
 Vue.use(Vuex);
 
 /**
- * Storage for data that needs to be accessed from various compoentns.
+ * Storage for data that needs to be accessed from various components.
  */
 const store = new Vuex.Store({
   state: {
@@ -34,7 +34,7 @@ const store = new Vuex.Store({
     updateFilter(state, filter) {
       /**
        * Update the stored freets filter to the specified one.
-       * @param filter - Username of the user to fitler freets by
+       * @param filter - Username of the user to filter freets by
        */
       state.filter = filter;
     },

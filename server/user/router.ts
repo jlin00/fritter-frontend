@@ -1,7 +1,11 @@
 import type {Request, Response} from 'express';
 import express from 'express';
-import FreetCollection from '../freet/collection';
 import UserCollection from './collection';
+import FreetCollection from '../freet/collection';
+import TaglistCollection from '../taglist/collection';
+import {VoteCollection, ReferenceLinkCollection} from '../factcheck/collection';
+import FollowCollection from '../follow/collection';
+import FilterCollection from '../filter/collection';
 import * as userValidator from '../user/middleware';
 import * as util from './util';
 
@@ -160,8 +164,35 @@ router.delete(
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const user = await UserCollection.findOneByUserId(userId);
+    const {username} = user;
+
+    // Delete all freets associated with user.
+    const promises = [];
+    const freets = await FreetCollection.findAllByUsername(username);
+    for (const freet of freets) {
+      promises.push(FreetCollection.deleteOne(freet._id));
+      promises.push(TaglistCollection.deleteOne(freet._id));
+      promises.push(VoteCollection.deleteManyByFreetId(freet._id));
+      promises.push(ReferenceLinkCollection.deleteManyByFreetId(freet._id));
+    }
+
+    await Promise.all(promises);
+
+    // Delete following and followers lists.
+    await FollowCollection.deleteManyByUserId(userId);
+
+    // Delete votes and links issued by user.
+    await VoteCollection.deleteManyByUserId(userId);
+    await ReferenceLinkCollection.deleteManyByUserId(userId);
+
+    // Delete filters by user, and any filters user appears in.
+    await FilterCollection.deleteAllByUserId(userId);
+    await FilterCollection.removeUserIdFromFilters(user._id);
+
+    // Finally, delete user.
     await UserCollection.deleteOne(userId);
-    await FreetCollection.deleteMany(userId);
+
     req.session.userId = undefined;
     res.status(200).json({
       message: 'Your account has been deleted successfully.'

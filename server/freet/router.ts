@@ -1,6 +1,8 @@
 import type {NextFunction, Request, Response} from 'express';
 import express from 'express';
 import FreetCollection from './collection';
+import TaglistCollection from '../taglist/collection';
+import {ReferenceLinkCollection, VoteCollection} from '../factcheck/collection';
 import * as userValidator from '../user/middleware';
 import * as freetValidator from '../freet/middleware';
 import * as util from './util';
@@ -95,6 +97,9 @@ router.delete(
   ],
   async (req: Request, res: Response) => {
     await FreetCollection.deleteOne(req.params.freetId);
+    await TaglistCollection.deleteOne(req.params.freetId);
+    await VoteCollection.deleteManyByFreetId(req.params.freetId);
+    await ReferenceLinkCollection.deleteManyByFreetId(req.params.freetId);
     res.status(200).json({
       message: 'Your freet was deleted successfully.'
     });
