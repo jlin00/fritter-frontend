@@ -38,6 +38,21 @@ class TaglistCollection {
   }
 
   /**
+   * Get or create the taglist associated with a freetId.
+   *
+   * @param {string} id - The id of the freet
+   * @return {Promise<HydratedDocument<Taglist>> | Promise<null> } - The taglist of the freet with the given freetId, if any
+   */
+  static async findOrCreateOne(id: Types.ObjectId | string): Promise<HydratedDocument<Taglist>> {
+    const taglist = await TaglistModel.findOne({freetId: id}).populate(['freetId', 'tags']);
+    if (!taglist) {
+      return this.addOne(id, []);
+    }
+
+    return taglist;
+  }
+
+  /**
    * Update the taglist associated with a freetId with the new tags.
    *
    * @param {string} id - The id of the freet whose taglist is to be updated

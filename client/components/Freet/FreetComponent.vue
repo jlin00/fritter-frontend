@@ -48,6 +48,32 @@
     >
       {{ freet.content }}
     </p>
+    <div>
+      Tags: <div v-if="editing">
+        <input
+          :name="collection"
+          :value="draftTag"
+          placeholder="Enter tag here..."
+          @input="draftTag = $event.target.value"
+          @keydown.enter.prevent="event => {
+            addTag(draftTag);
+            draftTag = '';
+          }"
+        ><br/><br/>
+      </div>
+      <span
+        v-for="tag in draftTags"
+        :key="tag"
+        class="tag"
+      >{{ tag }}
+        <button
+          v-if="editing"
+          @click="removeTag(tag)"
+        >
+          ✖️
+        </button>
+      </span>
+    </div>
     <p class="info">
       Posted at {{ freet.dateModified }}
       <i v-if="freet.edited">(edited)</i>
@@ -78,16 +104,38 @@ export default {
     return {
       editing: false, // Whether or not this freet is in edit mode
       draft: this.freet.content, // Potentially-new content for this freet
-      alerts: {} // Displays success/error messages encountered during freet modification
+      alerts: {}, // Displays success/error messages encountered during freet modification
+      draftTags: [...this.freet.tags],
+      draftTag: ''
     };
   },
   methods: {
+    addTag(tag) {
+      const regex = /^\w+$/i;
+      if (!regex.test(tag)) {
+        const formattingErrorMessage = `Tags must be nonempty, alphanumeric strings.`
+        this.$set(this.alerts, formattingErrorMessage, 'error');
+        setTimeout(() => this.$delete(this.alerts, formattingErrorMessage), 1500);
+      } else if (this.draftTags.includes(tag)) {
+        const duplicateErrorMessage = `You have already added this tag!`;
+        this.$set(this.alerts, duplicateErrorMessage, 'error');
+        setTimeout(() => this.$delete(this.alerts, duplicateErrorMessage), 1500);
+      } else {
+        this.draftTags.push(tag);
+      }
+    },
+    removeTag(tag) {
+      const index = this.draftTags.indexOf(tag);
+      if (index !== -1) this.draftTags.splice(index, 1);
+    },
     startEditing() {
       /**
        * Enables edit mode on this freet.
        */
       this.editing = true; // Keeps track of if a freet is being edited
       this.draft = this.freet.content; // The content of our current "draft" while being edited
+      this.draftTags = [...this.freet.tags];
+      this.draftTag = '';
     },
     stopEditing() {
       /**
@@ -95,6 +143,8 @@ export default {
        */
       this.editing = false;
       this.draft = this.freet.content;
+      this.draftTags = [...this.freet.tags];
+      this.draftTag = '';
     },
     deleteFreet() {
       /**
@@ -110,11 +160,17 @@ export default {
       };
       this.request(params);
     },
+    sameSet() {
+      if (this.freet.tags.length !== this.draftTags.length) {
+        return false 
+      }
+      return [...this.draftTags].every(i => this.freet.tags.includes(i))
+    },
     submitEdit() {
       /**
        * Updates freet to have the submitted draft content.
        */
-      if (this.freet.content === this.draft) {
+      if (this.freet.content === this.draft && this.sameSet()) {
         const error = 'Error: Edited freet content should be different than current freet content.';
         this.$set(this.alerts, error, 'error'); // Set an alert to be the error text, timeout of 3000 ms
         setTimeout(() => this.$delete(this.alerts, error), 3000);
@@ -123,16 +179,25 @@ export default {
 
       const params = {
         method: 'PATCH',
-        message: 'Successfully edited freet!',
         body: JSON.stringify({content: this.draft}),
         callback: () => {
-          this.$set(this.alerts, params.message, 'success');
-          setTimeout(() => this.$delete(this.alerts, params.message), 3000);
+          return;
         }
       };
-      this.request(params);
+      this.request(params, `/api/freets/${this.freet._id}`);
+
+      const tagParams = {
+        method: 'PATCH',
+        message: 'Successfully edited freet!',
+        body: JSON.stringify({tags: this.draftTags}),
+        callback: () => {
+          this.$set(this.alerts, tagParams.message, 'success');
+          setTimeout(() => this.$delete(this.alerts, tagParams.message), 3000);
+        }
+      }
+      this.request(tagParams, `/api/tags/${this.freet._id}`)
     },
-    async request(params) {
+    async request(params, url) {
       /**
        * Submits a request to the freet's endpoint
        * @param params - Options for the request
@@ -147,7 +212,7 @@ export default {
       }
 
       try {
-        const r = await fetch(`/api/freets/${this.freet._id}`, options);
+        const r = await fetch(url, options);
         if (!r.ok) {
           const res = await r.json();
           throw new Error(res.error);
@@ -171,5 +236,12 @@ export default {
     border: 1px solid #111;
     padding: 20px;
     position: relative;
+}
+
+.tag {
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 0rem 0.3rem;
+  margin: 0rem 0.3rem;
 }
 </style>

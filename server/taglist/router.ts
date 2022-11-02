@@ -21,11 +21,10 @@ const router = express.Router();
 router.get(
   '/:freetId?',
   [
-    freetValidator.isFreetExists,
-    taglistValidator.isTaglistExists
+    freetValidator.isFreetExists
   ],
   async (req: Request, res: Response) => {
-    const taglist = await TaglistCollection.findOne(req.params.freetId);
+    const taglist = await TaglistCollection.findOrCreateOne(req.params.freetId);
     const response = util.constructTaglistResponse(taglist);
     res.status(200).json(response);
   }

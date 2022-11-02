@@ -19,6 +19,20 @@ export default {
           throw new Error(res.error);
         }
 
+        for (const index in res) {
+          const freet = res[index];
+          const id = freet._id;
+          const req = `/api/tags/${id}`;
+          const response = await fetch(req);
+          const taglist = await response.json();
+
+          if (!response.ok) {
+            throw new Error(taglist.error);
+          }
+
+          res[index].tags = taglist.tags;
+        }
+
         this.$store.commit('updateFilter', this.value);
         this.$store.commit('updateFreets', res);
       } catch (e) {

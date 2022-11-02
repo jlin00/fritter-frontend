@@ -51,6 +51,15 @@ const store = new Vuex.Store({
        */
       const url = state.filter ? `/api/users/${state.filter}/freets` : '/api/freets';
       const res = await fetch(url).then(async r => r.json());
+
+      for (const index in res) {
+        const freet = res[index];
+        const id = freet._id;
+        const req = `/api/tags/${id}`;
+        const taglist = await fetch(req).then(async t => t.json());
+        res[index].tags = taglist.tags;
+      }
+
       state.freets = res;
     }
   },

@@ -16,15 +16,47 @@
           v-if="field.id === 'content'"
           :name="field.id"
           :value="field.value"
+          :placeholder="field.placeholder"
           @input="field.value = $event.target.value"
         />
-        <input
+        <div
           v-else
-          :type="field.id === 'password' ? 'password' : 'text'"
-          :name="field.id"
-          :value="field.value"
-          @input="field.value = $event.target.value"
         >
+          <div
+            v-if="field.id === 'collection'"
+          >
+            <input
+              :name="field.id"
+              :value="field.value"
+              :placeholder="field.placeholder"
+              @input="field.value = $event.target.value"
+              @keydown.enter.prevent="{
+                addItem(field.label, field.collectionType, field.collection, $event.target.value);
+                field.value = '';
+              }"
+            >
+            <div
+              v-for="item in field.collection"
+              :key="item"
+              class="enum"
+            >
+              {{ item }}
+              <button 
+                @click="removeItem(field.collection, item)"
+                class="remove"
+              >
+                ✖️
+              </button>
+            </div>
+          </div>
+          <input
+            v-else
+            :type="field.id === 'password' ? 'password' : 'text'"
+            :name="field.id"
+            :value="field.value"
+            @input="field.value = $event.target.value"
+          >
+        </div>
       </div>
     </article>
     <article v-else>
@@ -57,6 +89,7 @@ export default {
      */
     return {
       url: '', // Url to submit form to
+      auxiliaryUrl: '', // If form needs to be submitted to an additional url
       method: 'GET', // Form request method
       hasBody: false, // Whether or not form request has a body
       setUsername: false, // Whether or not stored username should be updated after form submission
@@ -66,6 +99,24 @@ export default {
     };
   },
   methods: {
+    addItem(label, itemType, collection, item) {
+      const regex = /^\w+$/i;
+      if (!regex.test(item)) {
+        const formattingErrorMessage = `${label} must be nonempty, alphanumeric strings.`
+        this.$set(this.alerts, formattingErrorMessage, 'error');
+        setTimeout(() => this.$delete(this.alerts, formattingErrorMessage), 1500);
+      } else if (collection.includes(item)) {
+        const duplicateErrorMessage = `You have already added this ${itemType}!`;
+        this.$set(this.alerts, duplicateErrorMessage, 'error');
+        setTimeout(() => this.$delete(this.alerts, duplicateErrorMessage), 1500);
+      } else {
+        collection.push(item);
+      }
+    },
+    removeItem(collection, item) {
+      const index = collection.indexOf(item);
+      if (index !== -1) collection.splice(index, 1);
+    },
     async submit() {
       /**
         * Submits a form with the specified options from data().
@@ -78,19 +129,42 @@ export default {
       if (this.hasBody) {
         options.body = JSON.stringify(Object.fromEntries(
           this.fields.map(field => {
-            const {id, value} = field;
-            field.value = '';
-            return [id, value];
+            const {id} = field;
+            if (id === 'collection') {
+              const {collectionName, collection} = field;
+              field.collection = [];
+              return [collectionName, collection];
+            } else {
+              const {value} = field;
+              field.value = '';
+              return [id, value]
+            }
           })
         ));
       }
 
       try {
         const r = await fetch(this.url, options);
+
         if (!r.ok) {
           // If response is not okay, we throw an error and enter the catch block
           const res = await r.json();
           throw new Error(res.error);
+        }
+
+        if (this.auxiliaryUrl != '') {
+          const text = await r.text();
+          const id = text ? JSON.parse(text).freet._id : undefined;
+          
+          const url = `${this.auxiliaryUrl}/${id}`;
+          const s = await fetch(url, options);
+          console.log(options);
+          console.log(url);
+          if (!s.ok) {
+            // If response is not okay, we throw an error and enter the catch block
+            const res = await s.json();
+            throw new Error(res.error);
+          }
         }
 
         if (this.setUsername) {
@@ -144,8 +218,19 @@ form h3 {
   margin-top: 0;
 }
 
-textarea {
-   font-family: inherit;
-   font-size: inherit;
+textarea, input {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.enum {
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 0.5rem;
+  margin: 0.5rem;
+}
+
+.remove {
+  float: right;
 }
 </style>
