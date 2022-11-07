@@ -1,6 +1,7 @@
 import type {Types} from 'mongoose';
 import {Schema, model} from 'mongoose';
 import type {User} from '../user/model';
+import type {Tag} from '../tag/model';
 
 /**
  * This file defines the properties stored in a Freet
@@ -14,6 +15,7 @@ export type Freet = {
   dateCreated: Date;
   content: string;
   dateModified: Date;
+  tags: Types.ObjectId[];
 };
 
 export type PopulatedFreet = {
@@ -22,6 +24,7 @@ export type PopulatedFreet = {
   dateCreated: Date;
   content: string;
   dateModified: Date;
+  tags: Tag[];
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table
@@ -48,6 +51,14 @@ const FreetSchema = new Schema<Freet>({
   // The date the freet was modified
   dateModified: {
     type: Date,
+    required: true
+  },
+  // The tags associated with the freet
+  tags: {
+    type: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Tag'
+    }],
     required: true
   }
 });

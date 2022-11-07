@@ -2,7 +2,6 @@ import type {Request, Response} from 'express';
 import express from 'express';
 import UserCollection from './collection';
 import FreetCollection from '../freet/collection';
-import TaglistCollection from '../taglist/collection';
 import {VoteCollection, ReferenceLinkCollection} from '../factcheck/collection';
 import FollowCollection from '../follow/collection';
 import FilterCollection from '../filter/collection';
@@ -172,7 +171,6 @@ router.delete(
     const freets = await FreetCollection.findAllByUsername(username);
     for (const freet of freets) {
       promises.push(FreetCollection.deleteOne(freet._id));
-      promises.push(TaglistCollection.deleteOne(freet._id));
       promises.push(VoteCollection.deleteManyByFreetId(freet._id));
       promises.push(ReferenceLinkCollection.deleteManyByFreetId(freet._id));
     }

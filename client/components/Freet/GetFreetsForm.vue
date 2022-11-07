@@ -7,7 +7,9 @@ export default {
   name: 'GetFreetsForm',
   mixins: [InlineForm],
   data() {
-    return {value: this.$store.state.filter};
+    return {
+      value: this.$store.state.filter
+    };
   },
   methods: {
     async submit() {
@@ -18,21 +20,7 @@ export default {
         if (!r.ok) {
           throw new Error(res.error);
         }
-
-        for (const index in res) {
-          const freet = res[index];
-          const id = freet._id;
-          const req = `/api/tags/${id}`;
-          const response = await fetch(req);
-          const taglist = await response.json();
-
-          if (!response.ok) {
-            throw new Error(taglist.error);
-          }
-
-          res[index].tags = taglist.tags;
-        }
-
+        
         this.$store.commit('updateFilter', this.value);
         this.$store.commit('updateFreets', res);
       } catch (e) {

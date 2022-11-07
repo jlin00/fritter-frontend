@@ -53,7 +53,7 @@
         <input
           :name="collection"
           :value="draftTag"
-          placeholder="Enter tag here..."
+          placeholder="Type tag and press enter"
           @input="draftTag = $event.target.value"
           @keydown.enter.prevent="event => {
             addTag(draftTag);
@@ -75,8 +75,8 @@
       </span>
     </div>
     <p class="info">
-      Posted at {{ freet.dateModified }}
-      <i v-if="freet.edited">(edited)</i>
+      Last modified {{ freet.dateModified }}
+      <i v-if="freet.dateModified !== freet.dateCreated">(edited)</i>
     </p>
     <section class="alerts">
       <article
@@ -179,23 +179,12 @@ export default {
 
       const params = {
         method: 'PATCH',
-        body: JSON.stringify({content: this.draft}),
-        callback: () => {
-          return;
-        }
+        body: JSON.stringify({content: this.draft, tags: this.draftTags}),
+        callback: null
       };
       this.request(params, `/api/freets/${this.freet._id}`);
-
-      const tagParams = {
-        method: 'PATCH',
-        message: 'Successfully edited freet!',
-        body: JSON.stringify({tags: this.draftTags}),
-        callback: () => {
-          this.$set(this.alerts, tagParams.message, 'success');
-          setTimeout(() => this.$delete(this.alerts, tagParams.message), 3000);
-        }
-      }
-      this.request(tagParams, `/api/tags/${this.freet._id}`)
+      this.editing = false;
+      this.$store.commit('refreshFreets');
     },
     async request(params, url) {
       /**
@@ -217,11 +206,7 @@ export default {
           const res = await r.json();
           throw new Error(res.error);
         }
-
-        this.editing = false;
-        this.$store.commit('refreshFreets');
-
-        params.callback();
+        if (params.callback) params.callback();
       } catch (e) {
         this.$set(this.alerts, e, 'error');
         setTimeout(() => this.$delete(this.alerts, e), 3000);

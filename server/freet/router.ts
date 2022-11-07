@@ -1,7 +1,6 @@
 import type {NextFunction, Request, Response} from 'express';
 import express from 'express';
 import FreetCollection from './collection';
-import TaglistCollection from '../taglist/collection';
 import {ReferenceLinkCollection, VoteCollection} from '../factcheck/collection';
 import * as userValidator from '../user/middleware';
 import * as freetValidator from '../freet/middleware';
@@ -56,20 +55,22 @@ router.get(
  * @name POST /api/freets
  *
  * @param {string} content - The content of the freet
+ * @param {string[]} tags - The tags associated with the freet
  * @return {FreetResponse} - The created freet
  * @throws {403} - If the user is not logged in
- * @throws {400} - If the freet content is empty or a stream of empty spaces
+ * @throws {400} - If the freet content is empty or a stream of empty spaces, or the tags are wrongly formatted
  * @throws {413} - If the freet content is more than 140 characters long
  */
 router.post(
   '/',
   [
     userValidator.isUserLoggedIn,
-    freetValidator.isValidFreetContent
+    freetValidator.isValidFreetContent,
+    freetValidator.isValidTaglist
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    const freet = await FreetCollection.addOne(userId, req.body.content);
+    const freet = await FreetCollection.addOne(userId, req.body.content, req.body.tags);
 
     res.status(201).json({
       message: 'Your freet was created successfully.',
@@ -97,7 +98,6 @@ router.delete(
   ],
   async (req: Request, res: Response) => {
     await FreetCollection.deleteOne(req.params.freetId);
-    await TaglistCollection.deleteOne(req.params.freetId);
     await VoteCollection.deleteManyByFreetId(req.params.freetId);
     await ReferenceLinkCollection.deleteManyByFreetId(req.params.freetId);
     res.status(200).json({
@@ -112,11 +112,12 @@ router.delete(
  * @name PATCH /api/freets/:id
  *
  * @param {string} content - the new content for the freet
+ * @param {string[]} tags - the tags associated with the freet
  * @return {FreetResponse} - the updated freet
  * @throws {403} - if the user is not logged in or not the author of
  *                 of the freet
  * @throws {404} - If the freetId is not valid
- * @throws {400} - If the freet content is empty or a stream of empty spaces
+ * @throws {400} - If the freet content is empty or a stream of empty spaces, or the tags are wrongly formatted
  * @throws {413} - If the freet content is more than 140 characters long
  */
 router.patch(
@@ -125,10 +126,11 @@ router.patch(
     userValidator.isUserLoggedIn,
     freetValidator.isFreetExists,
     freetValidator.isValidFreetModifier,
-    freetValidator.isValidFreetContent
+    freetValidator.isValidFreetContent,
+    freetValidator.isValidTaglist
   ],
   async (req: Request, res: Response) => {
-    const freet = await FreetCollection.updateOne(req.params.freetId, req.body.content);
+    const freet = await FreetCollection.updateOne(req.params.freetId, req.body.content, req.body.tags);
     res.status(200).json({
       message: 'Your freet was updated successfully.',
       freet: util.constructFreetResponse(freet)

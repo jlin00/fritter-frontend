@@ -57,8 +57,34 @@ const isValidFreetModifier = async (req: Request, res: Response, next: NextFunct
   next();
 };
 
+/**
+ * Check that each tag in the taglist is valid, it matches the tag regex
+ */
+const isValidTaglist = async (req: Request, res: Response, next: NextFunction) => {
+  let tags;
+  if (req.query.tags !== undefined) {
+    tags = (req.query.tags as string) === '' ? [] : (req.query.tags as string).split(',');
+  } else if (req.query.tags === undefined) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    tags = req.body.tags;
+  }
+
+  const tagRegex = /^\w+$/i;
+  for (const tag of tags) {
+    if (!tagRegex.test(tag)) {
+      res.status(400).json({
+        error: 'Tag must be a nonempty alphanumeric string.'
+      });
+      return;
+    }
+  }
+
+  next();
+};
+
 export {
   isValidFreetContent,
   isFreetExists,
-  isValidFreetModifier
+  isValidFreetModifier,
+  isValidTaglist
 };

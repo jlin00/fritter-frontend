@@ -4,13 +4,10 @@ import FilterCollection from './collection';
 import UserCollection from '../user/collection';
 import * as filterValidator from './middleware';
 import * as userValidator from '../user/middleware';
-import * as taglistValidator from '../taglist/middleware';
+import * as freetValidator from '../freet/middleware';
 import * as util from './util';
-import type {Freet} from '../freet/model';
-import type {HydratedDocument, Types} from 'mongoose';
 import {constructFreetResponse} from '../freet/util';
 import FreetCollection from '../freet/collection';
-import TaglistCollection from '../taglist/collection';
 import TagCollection from '../tag/collection';
 
 const router = express.Router();
@@ -84,7 +81,7 @@ router.post(
     filterValidator.isValidFilterName,
     filterValidator.isFilterNameNotAlreadyInUse,
     filterValidator.isValidUsernameList,
-    taglistValidator.isValidTaglist
+    freetValidator.isValidTaglist
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
@@ -125,7 +122,7 @@ router.patch(
     filterValidator.isValidFilterName,
     filterValidator.isFilterNameNotAlreadyInUse,
     filterValidator.isValidUsernameList,
-    taglistValidator.isValidTaglist
+    freetValidator.isValidTaglist
   ],
   async (req: Request, res: Response) => {
     const users = await UserCollection.retrieveUsers(req.body.usernames);
@@ -201,14 +198,14 @@ searchRouter.get(
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
     const filter = await FilterCollection.findOneByUserIdAndName(userId, req.query.name as string);
     const {usernames, tags} = filter;
-    const freets = await findFreetsByParameters(usernames, tags);
+    const freets = await FreetCollection.filter(usernames, tags);
     const response = freets.map(constructFreetResponse);
     res.status(200).json(response);
   },
   [
     filterValidator.isValidParameters,
     filterValidator.isValidUsernameList,
-    taglistValidator.isValidTaglist
+    freetValidator.isValidTaglist
   ],
   async (req: Request, res: Response) => {
     const usernames = (req.query.usernames as string) === '' ? [] : (req.query.usernames as string).split(',');
@@ -219,43 +216,11 @@ searchRouter.get(
     const tags = await TagCollection.findOrCreateMany(taglist);
     const tagIds = tags.map(t => t._id);
 
-    const freets = await findFreetsByParameters(userIds, tagIds);
+    const freets = await FreetCollection.filter(userIds, tagIds);
     const response = freets.map(constructFreetResponse);
     res.status(200).json(response);
   }
 );
-
-/**
- * Get freets matching specified parameters.
- *
- * @param {string[]} usernames - The users to filter for
- * @param {string[]} tags - The tags to filter for
- * @returns {Promise<HydratedDocument<Freet>[]>} - The array of freets matching parameters, not de-duplicated
- */
-export const findFreetsByParameters = async (usernames: Types.ObjectId[], tags: Types.ObjectId[]): Promise<Array<HydratedDocument<Freet>>> => {
-  const promises = [];
-  const taglists = await TaglistCollection.filterByTag(tags);
-  for (const taglist of taglists) {
-    promises.push(FreetCollection.findOne(taglist.freetId._id));
-  }
-
-  const resultsMatchingTag = await Promise.all(promises);
-  const resultsMatchingAuthor = await FreetCollection.filterByAuthor(usernames);
-
-  const freetIds = new Set();
-  const output = [];
-
-  for (const results of [resultsMatchingAuthor, resultsMatchingTag]) {
-    for (const result of results) {
-      if (!freetIds.has(result._id.toString())) {
-        freetIds.add(result._id.toString());
-        output.push(result);
-      }
-    }
-  }
-
-  return output;
-};
 
 export {router as filterRouter};
 export {searchRouter};

@@ -9,7 +9,6 @@ import dotenv from 'dotenv';
 import * as userValidator from '../server/user/middleware';
 import {userRouter} from '../server/user/router';
 import {freetRouter} from '../server/freet/router';
-import {taglistRouter} from '../server/taglist/router';
 import {followRouter} from '../server/follow/router';
 import {filterRouter, searchRouter} from '../server/filter/router';
 import {factCheckRouter} from '../server/factcheck/router';
@@ -74,7 +73,6 @@ app.use(userValidator.isCurrentSessionUserExists);
 // Add routers from routes folder
 app.use('/api/users', userRouter);
 app.use('/api/freets', freetRouter);
-app.use('/api/tags', taglistRouter);
 app.use('/api/follow', followRouter);
 app.use('/api/filters', filterRouter);
 app.use('/api/credibility', factCheckRouter);

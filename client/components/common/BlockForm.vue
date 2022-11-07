@@ -89,7 +89,6 @@ export default {
      */
     return {
       url: '', // Url to submit form to
-      auxiliaryUrl: '', // If form needs to be submitted to an additional url
       method: 'GET', // Form request method
       hasBody: false, // Whether or not form request has a body
       setUsername: false, // Whether or not stored username should be updated after form submission
@@ -150,21 +149,6 @@ export default {
           // If response is not okay, we throw an error and enter the catch block
           const res = await r.json();
           throw new Error(res.error);
-        }
-
-        if (this.auxiliaryUrl != '') {
-          const text = await r.text();
-          const id = text ? JSON.parse(text).freet._id : undefined;
-          
-          const url = `${this.auxiliaryUrl}/${id}`;
-          const s = await fetch(url, options);
-          console.log(options);
-          console.log(url);
-          if (!s.ok) {
-            // If response is not okay, we throw an error and enter the catch block
-            const res = await s.json();
-            throw new Error(res.error);
-          }
         }
 
         if (this.setUsername) {

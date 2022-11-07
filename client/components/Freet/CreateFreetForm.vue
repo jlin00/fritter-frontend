@@ -9,12 +9,11 @@ export default {
   data() {
     return {
       url: '/api/freets',
-      auxiliaryUrl: '/api/tags',
       method: 'POST',
       hasBody: true,
       fields: [
         {id: 'content', label: 'Content', value: '', placeholder: 'What\'s on your mind?'},
-        {id: 'collection', label: 'Tags', value: '', placeholder: 'Enter tag here...', collectionName: 'tags', collectionType: 'tag', collection: []}
+        {id: 'collection', label: 'Tags', value: '', placeholder: 'Type tag and press enter', collectionName: 'tags', collectionType: 'tag', collection: []}
       ],
       title: 'Create a freet',
       refreshFreets: true,
