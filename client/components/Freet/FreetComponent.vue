@@ -3,45 +3,55 @@
 
 <template>
   <article
-    class="freet"
+    class="freet border rounded my-2 p-4"
   >
     <header>
       <h3 class="author">
         @{{ freet.author }}
       </h3>
+      <hr/>
       <div
         v-if="$store.state.username === freet.author"
         class="actions"
       >
-        <button
+        <button 
+          class="btn btn-primary btn-sm my-2 mr-2 bi bi-check"
           v-if="editing"
           @click="submitEdit"
         >
-          ✅ Save changes
+          Save changes
         </button>
         <button
+          class="btn btn-secondary btn-sm my-2 mr-2 bi bi-x"
           v-if="editing"
           @click="stopEditing"
         >
-          🚫 Discard changes
+          Discard changes
         </button>
-        <button
+        <button 
+          class="btn btn-primary btn-sm my-2 mr-2 bi bi-pencil"
           v-if="!editing"
           @click="startEditing"
         >
-          ✏️ Edit
+          Edit
         </button>
-        <button @click="deleteFreet">
-          🗑️ Delete
+        <button 
+          class="btn btn-danger btn-sm my-2 mr-2 bi bi-trash"
+          @click="deleteFreet"
+        >
+          Delete
         </button>
       </div>
     </header>
-    <textarea
+    <div
       v-if="editing"
-      class="content"
-      :value="draft"
-      @input="draft = $event.target.value"
-    />
+    >
+      <i>Content:</i><textarea
+        class="form-control content mb-2"
+        :value="draft"
+        @input="draft = $event.target.value"
+      />
+    </div>
     <p
       v-else
       class="content"
@@ -49,8 +59,10 @@
       {{ freet.content }}
     </p>
     <div>
-      Tags: <div v-if="editing">
+      <i>Tags:</i> <div v-if="editing">
         <input
+          id="tags"
+          class="form-control"
           :name="collection"
           :value="draftTag"
           placeholder="Type tag and press enter"
@@ -59,25 +71,26 @@
             addTag(draftTag);
             draftTag = '';
           }"
-        ><br/><br/>
+        >
       </div>
       <span
         v-for="tag in draftTags"
         :key="tag"
-        class="tag"
+        class="badge badge-pill badge-secondary px-2 mx-1 py-1"
       >{{ tag }}
-        <button
+        <span
           v-if="editing"
+          class="bi bi-x-circle"
           @click="removeTag(tag)"
         >
-          ✖️
-        </button>
+        </span>
       </span>
     </div>
-    <p class="info">
+    <hr/>
+    <small class="text-secondary"><p class="info">
       Last modified {{ freet.dateModified }}
       <i v-if="freet.dateModified !== freet.dateCreated">(edited)</i>
-    </p>
+    </p></small>
     <section class="alerts">
       <article
         v-for="(status, alert, index) in alerts"
@@ -218,15 +231,6 @@ export default {
 
 <style scoped>
 .freet {
-    border: 1px solid #111;
-    padding: 20px;
     position: relative;
-}
-
-.tag {
-  border: 1px solid black;
-  border-radius: 10px;
-  padding: 0rem 0.3rem;
-  margin: 0rem 0.3rem;
 }
 </style>

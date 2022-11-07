@@ -2,18 +2,23 @@
 <!-- This is just an example; feel free to define any reusable components you want! -->
 
 <template>
-  <form @submit.prevent="submit">
+  <form 
+    class="border rounded p-4"
+    @submit.prevent="submit"
+  >
     <h3>{{ title }}</h3>
     <article
       v-if="fields.length"
     >
       <div
         v-for="field in fields"
+        class="mb-2"
         :key="field.id"
       >
-        <label :for="field.id">{{ field.label }}:</label>
+        <label :for="field.id"><i>{{ field.label }}:</i></label>
         <textarea
           v-if="field.id === 'content'"
+          class="form-control"
           :name="field.id"
           :value="field.value"
           :placeholder="field.placeholder"
@@ -26,6 +31,7 @@
             v-if="field.id === 'collection'"
           >
             <input
+              class="form-control"
               :name="field.id"
               :value="field.value"
               :placeholder="field.placeholder"
@@ -35,19 +41,17 @@
                 field.value = '';
               }"
             >
-            <div
+            <span
               v-for="item in field.collection"
               :key="item"
-              class="enum"
-            >
-              {{ item }}
-              <button 
+              class="badge badge-pill badge-secondary px-2 mx-1 py-1"
+            >{{ item }}
+              <span
+                class="bi bi-x-circle"
                 @click="removeItem(field.collection, item)"
-                class="remove"
               >
-                ✖️
-              </button>
-            </div>
+              </span>
+            </span>
           </div>
           <input
             v-else
@@ -64,6 +68,7 @@
     </article>
     <button
       type="submit"
+      class="btn btn-block btn-primary"
     >
       {{ title }}
     </button>
@@ -175,8 +180,6 @@ export default {
 
 <style scoped>
 form {
-  border: 1px solid #111;
-  padding: 0.5rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -205,16 +208,5 @@ form h3 {
 textarea, input {
   font-family: inherit;
   font-size: inherit;
-}
-
-.enum {
-  border: 1px solid black;
-  border-radius: 5px;
-  padding: 0.5rem;
-  margin: 0.5rem;
-}
-
-.remove {
-  float: right;
 }
 </style>
