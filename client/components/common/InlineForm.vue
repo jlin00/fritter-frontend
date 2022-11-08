@@ -4,24 +4,17 @@
 <template>
   <form @submit.prevent="submit">
     <input
+      class="form-control"
       v-model="value"
       type="text"
       :placeholder="placeholder"
     >
     <button
+      class="btn btn-dark"
       type="submit"
     >
       {{ button }}
     </button>
-    <section class="alerts">
-      <article
-        v-for="(status, alert, index) in alerts"
-        :key="index"
-        :class="status"
-      >
-        <p>{{ alert }}</p>
-      </article>
-    </section>
   </form>
 </template>
 
@@ -39,7 +32,7 @@ export default {
     }
   },
   data() {
-    return {value: '', alerts: {}};
+    return {value: ''};
   }
 };
 </script>
@@ -52,6 +45,6 @@ form {
 
 input {
     padding: 0 5px;
-    min-width: 200px;
+    min-width: 300px;
 }
 </style>

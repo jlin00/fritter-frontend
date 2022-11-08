@@ -3,79 +3,67 @@
 <!-- This navbar takes advantage of both flex and grid layouts for positioning elements; feel free to redesign as you see fit! -->
 
 <template>
-  <nav>
-    <div class="left">
-      <img src="../../public/logo.svg">
-      <h1 class="title">
+  <div 
+    class="sidebar d-flex flex-column flex-shrink-0 p-4 text-white bg-dark" 
+  >
+    <router-link 
+      class="text-white"
+      to="/"
+    >
+      <h1 class="fs-4 mb-4">
+        <img class="mx-2" src="../../public/logo.svg">
         Fritter
       </h1>
-    </div>
-    <div class="right">
-      <router-link to="/">
-        Home
-      </router-link>
-      <router-link
-        v-if="$store.state.username"
-        to="/account"
+    </router-link>
+    <br/>
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item mb-3">
+        <router-link 
+          class="text-white"
+          to="/"
+        >
+          <i class="bi bi-house mx-2"></i>
+          <span class="fs-4">Home</span>
+        </router-link>
+      </li>
+      <li class="nav-item mb-3" v-if="$store.state.username">
+        <router-link 
+          class="text-white"
+          to="/account"
+        >
+          <i class="bi bi-speedometer2 mx-2"></i>
+          <span class="fs-4">Account</span>
+        </router-link>
+      </li>
+    </ul>
+    <div v-if="$store.state.username">
+      <router-link 
+        class="text-white"
+        :to="'/user/' + $store.state.username" 
       >
-        Account
+        <i class="bi bi-person-circle mx-2"></i>
+        <span class="fs-4">{{ $store.state.username }}</span>
       </router-link>
-      <router-link
-        v-else
+    </div>
+    <div v-else>
+      <router-link 
+        class="text-white"
         to="/login"
       >
-        Login
+        <i class="bi bi-person-circle mx-2"></i>
+        <span class="fs-4">Login</span>
       </router-link>
     </div>
-    <section class="alerts">
-      <article
-        v-for="(status, alert, index) in $store.state.alerts"
-        :key="index"
-        :class="status"
-      >
-        <p>{{ alert }}</p>
-      </article>
-    </section>
-  </nav>
+  </div>
 </template>
 
 <style scoped>
-nav {
-    padding: 1vw 2vw;
-    background-color: #ccc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-}
-
-.title {
-    font-size: 32px;
-    margin: 0 5px;
-}
-
 img {
-    height: 32px;
+    height: 40px;
 }
 
-.left {
-	display: flex;
-	align-items: center;
-}
-
-.right {
-    font-size: 20px;
-    display: grid;
-    gap: 16px;
-    grid-auto-flow: column;
-    align-items: center;
-}
-
-.right a {
-    margin-left: 5px;
-}
-
-.alerts {
-    width: 25%;
+.sidebar {
+  height: 100vh;
+  width: 100%;
 }
 </style>

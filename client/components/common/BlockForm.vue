@@ -55,6 +55,7 @@
           </div>
           <input
             v-else
+            class="form-control"
             :type="field.id === 'password' ? 'password' : 'text'"
             :name="field.id"
             :value="field.value"
@@ -72,15 +73,6 @@
     >
       {{ title }}
     </button>
-    <section class="alerts">
-      <article
-        v-for="(status, alert, index) in alerts"
-        :key="index"
-        :class="status"
-      >
-        <p>{{ alert }}</p>
-      </article>
-    </section>
   </form>
 </template>
 
@@ -98,7 +90,6 @@ export default {
       hasBody: false, // Whether or not form request has a body
       setUsername: false, // Whether or not stored username should be updated after form submission
       refreshFreets: false, // Whether or not stored freets should be updated after form submission
-      alerts: {}, // Displays success/error messages encountered during form submission
       callback: null // Function to run after successful form submission
     };
   },
@@ -107,12 +98,16 @@ export default {
       const regex = /^\w+$/i;
       if (!regex.test(item)) {
         const formattingErrorMessage = `${label} must be nonempty, alphanumeric strings.`
-        this.$set(this.alerts, formattingErrorMessage, 'error');
-        setTimeout(() => this.$delete(this.alerts, formattingErrorMessage), 1500);
+        this.$store.commit('alert', {
+          message: formattingErrorMessage, 
+          status: 'danger'
+        });
       } else if (collection.includes(item)) {
         const duplicateErrorMessage = `You have already added this ${itemType}!`;
-        this.$set(this.alerts, duplicateErrorMessage, 'error');
-        setTimeout(() => this.$delete(this.alerts, duplicateErrorMessage), 1500);
+        this.$store.commit('alert', {
+          message: duplicateErrorMessage, 
+          status: 'danger'
+        });
       } else {
         collection.push(item);
       }
@@ -170,8 +165,10 @@ export default {
           this.callback();
         }
       } catch (e) {
-        this.$set(this.alerts, e, 'error');
-        setTimeout(() => this.$delete(this.alerts, e), 3000);
+        this.$store.commit('alert', {
+          message: e, 
+          status: 'danger'
+        });
       }
     }
   }

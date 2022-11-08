@@ -24,3 +24,10 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+button {
+  border: #dc3545;
+  background-color: #dc3545;
+}
+</style>

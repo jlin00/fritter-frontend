@@ -35,8 +35,10 @@ export default {
           this.value = this.$store.state.filter;
         }
 
-        this.$set(this.alerts, e, 'error');
-        setTimeout(() => this.$delete(this.alerts, e), 3000);
+        this.$store.commit('alert', {
+          message: e, 
+          status: 'danger'
+        });
       }
     }
   }

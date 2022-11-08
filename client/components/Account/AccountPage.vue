@@ -7,15 +7,28 @@
       <header>
         <h2>Account settings for @{{ $store.state.username }}</h2>
       </header>
-      <ChangeUsernameForm />
-      <ChangePasswordForm />
+      <div class="row">
+        <div class="col-6">
+          <ChangeUsernameForm />
+        </div>
+        <div class="col-6">
+          <ChangePasswordForm />
+        </div>
+      </div>
     </section>
+    <br/><br/>
     <section>
       <header>
         <h2>Account management</h2>
       </header>
-      <LogoutForm />
-      <DeleteAccountForm />
+      <div class="row">
+        <div class="col-6">
+          <LogoutForm />
+        </div>
+        <div class="col-6">
+          <DeleteAccountForm />
+        </div>
+      </div>
     </section>
   </main>
 </template>

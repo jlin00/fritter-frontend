@@ -21,6 +21,7 @@
         </h3>
       </article>
     </section>
+    <hr/>
     <section>
       <header>
         <div class="left">
@@ -36,7 +37,7 @@
             ref="getFreetsForm"
             value="author"
             placeholder="🔍 Filter by author (optional)"
-            button="🔄 Get freets"
+            button="Search"
           />
         </div>
       </header>
