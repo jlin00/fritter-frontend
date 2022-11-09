@@ -1,4 +1,4 @@
-<!-- Page for user profile -->
+<!-- Page for tag profile -->
 
 <template>
   <div>
@@ -10,14 +10,14 @@
     <main v-else>
       <section>
         <header>
-          <span class="display-4">@{{ $route.params.username }}</span>
+          <span class="display-4">#{{ $route.params.tag }}</span>
           <span
-            v-if="$store.state.username && $route.params.username !== $store.state.username"
+            v-if="$store.state.username"
           >
             <button 
               v-if="!isFollowing()"
               class="btn btn-primary"
-              @click="submitFollow($route.params.username, 'User')"
+              @click="submitFollow($route.params.tag, 'Tag')"
             >
               <i class="bi bi-plus"></i>
               Follow
@@ -38,8 +38,6 @@
         <nav>
           <div class="nav nav-tabs" id="nav-tab" role="tablist">
             <button class="nav-link active" id="nav-home-tab" data-toggle="tab" data-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Freets</button>
-            <button class="nav-link" id="nav-profile-tab" data-toggle="tab" data-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Followers</button>
-            <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Following</button>
           </div>
         </nav>
         <div class="tab-content" id="nav-tabContent">
@@ -50,40 +48,6 @@
               :freet="freet"
             />
           </div>
-          <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-            <div
-              v-for="source in followers"
-              :key="source.follower"
-            >
-              <UserComponent 
-                v-if="source.sourceModel === 'User'"
-                :username="source.follower"
-                :followId="source._id"
-              />
-              <TagComponent 
-                v-else
-                :tag="source.follower"
-                :followId="source._id"
-              />
-            </div>
-          </div>
-          <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
-            <div
-              v-for="source in following"
-              :key="source.following"
-            >
-              <UserComponent 
-                v-if="source.sourceModel === 'User'"
-                :username="source.following"
-                :followId="source._id"
-              />
-              <TagComponent 
-                v-else
-                :tag="source.following"
-                :followId="source._id"
-              />
-            </div>
-          </div>
         </div>
       </section>
     </main>
@@ -92,17 +56,13 @@
 
 <script>
 import FreetComponent from '@/components/Freet/FreetComponent.vue';
-import UserComponent from '@/components/Profile/UserComponent.vue';
-import TagComponent from '@/components/Profile/TagComponent.vue';
 
 export default {
-  name: 'ProfilePage',
-  components: {FreetComponent, UserComponent, TagComponent},
+  name: 'TagPage',
+  components: {FreetComponent},
   data() {
     return {
       freets: [],
-      followers: [],
-      following: [],
       fetching: true,
       id: null,
     }
@@ -120,7 +80,7 @@ export default {
   methods: {
     isFollowing() {
       for (const f of this.$store.state.following) {
-        if (f.following === this.$route.params.username) {
+        if (f.following === this.$route.params.tag) {
           this.id = f._id;
           return true;
         }
@@ -152,8 +112,8 @@ export default {
           this.$store.commit('updateFollowing', res);
         }
 
-        // Get freets of requested user 
-        url = `/api/freets?author=${this.$route.params.username}`
+        // Get freets of requested tag 
+        url = `/api/content?usernames=&tags=${this.$route.params.tag}`
         r = await fetch(url, options);
         res = await r.json();
         if (!r.ok) {
@@ -161,31 +121,12 @@ export default {
         }
         this.freets = res;
 
-        // Get followers of requested user 
-        url = `/api/follow?followersOf=${this.$route.params.username}`
-        r = await fetch(url, options);
-        res = await r.json();
-        if (!r.ok) {
-          throw new Error(res.error);
-        }
-        this.followers = res;
-
-        // Get following of requested user 
-        url = `/api/follow?followingOf=${this.$route.params.username}`
-        r = await fetch(url, options);
-        res = await r.json();
-        if (!r.ok) {
-          throw new Error(res.error);
-        }
-        this.following = res;
-
         this.fetching = false;
       } catch (e) {
         this.$store.commit('alert', {
           message: e, 
           status: 'danger'
         });
-        this.$router.push({ path: '/404' });
       }
     },
     async submitFollow(source, type) {

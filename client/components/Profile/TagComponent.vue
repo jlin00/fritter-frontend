@@ -1,4 +1,4 @@
-<!-- Reusable component representing a single user -->
+<!-- Reusable component representing a single tag -->
 
 <template>
   <article
@@ -6,13 +6,13 @@
   >
     <header>
       <router-link
-        :to="'/users/' + username" 
+        :to="'/tags/' + tag" 
       >
-        @{{ username }}
+        #{{ tag }}
       </router-link>
-      <span v-if="$store.state.username && username !== $store.state.username">
+      <span v-if="$store.state.username">
         <button 
-          v-if="!isFollowing(username)"
+          v-if="!isFollowing(tag)"
           class="btn btn-primary"
           @click="submitFollow"
         >
@@ -34,9 +34,9 @@
 
 <script>
 export default {
-  name: 'UserComponent',
+  name: 'TagComponent',
   props: {
-    username: {
+    tag: {
       type: String,
       required: true
     },
@@ -46,8 +46,8 @@ export default {
     }
   },
   methods: {
-    isFollowing(username) {
-      return this.$store.state.following.some(f => f.following === username);
+    isFollowing(tag) {
+      return this.$store.state.following.some(f => f.following === tag);
     },
     async submitFollow() {
       try {
@@ -55,7 +55,7 @@ export default {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           credentials: 'same-origin', // Sends express-session credentials with request
-          body: JSON.stringify({source: this.username, type: 'User'}),
+          body: JSON.stringify({source: this.tag, type: 'Tag'}),
         };
 
         const url = '/api/follow/';

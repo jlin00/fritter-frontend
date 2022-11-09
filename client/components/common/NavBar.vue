@@ -39,7 +39,7 @@
     <div v-if="$store.state.username">
       <router-link 
         class="text-white"
-        :to="'/user/' + $store.state.username" 
+        :to="'/users/' + $store.state.username" 
       >
         <i class="bi bi-person-circle mx-2"></i>
         <span class="fs-4">{{ $store.state.username }}</span>

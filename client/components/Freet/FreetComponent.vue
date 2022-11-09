@@ -7,7 +7,7 @@
   >
     <header>
       <router-link
-        :to="'/user/' + freet.author" 
+        :to="'/users/' + freet.author" 
       >
         <h3>@{{ freet.author }}</h3>
       </router-link>
@@ -88,13 +88,14 @@
       </span>
     </div>
     <div v-else>
-      <span
+      <router-link
         v-for="tag in freet.tags"
         :key="tag"
         class="badge badge-pill badge-secondary px-2 mx-1 py-1"
+        :to="'/tags/' + tag"
       >
         {{ tag }}
-      </span>
+      </router-link>
     </div>
     <hr/>
     <small class="text-secondary"><p class="info">
@@ -248,5 +249,9 @@ export default {
 <style scoped>
 a {
   color: inherit;
+}
+
+.badge-pill {
+  color: white;
 }
 </style>
