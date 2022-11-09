@@ -2,6 +2,8 @@ import type {Types} from 'mongoose';
 import {Schema, model} from 'mongoose';
 import type {User} from '../user/model';
 import type {Tag} from '../tag/model';
+import type {Link, PopulatedLink} from '../link/model';
+import {LinkSchema} from '../link/model';
 
 /**
  * This file defines the properties stored in a Freet
@@ -16,6 +18,9 @@ export type Freet = {
   content: string;
   dateModified: Date;
   tags: Types.ObjectId[];
+  upvotes: Types.ObjectId[];
+  downvotes: Types.ObjectId[];
+  links: Link[];
 };
 
 export type PopulatedFreet = {
@@ -25,6 +30,9 @@ export type PopulatedFreet = {
   content: string;
   dateModified: Date;
   tags: Tag[];
+  upvotes: User[];
+  downvotes: User[];
+  links: PopulatedLink[];
 };
 
 // Mongoose schema definition for interfacing with a MongoDB table
@@ -59,6 +67,24 @@ const FreetSchema = new Schema<Freet>({
       type: Schema.Types.ObjectId,
       ref: 'Tag'
     }],
+    required: true
+  },
+  upvotes: {
+    type: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    required: true
+  },
+  downvotes: {
+    type: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    required: true
+  },
+  links: {
+    type: [LinkSchema],
     required: true
   }
 });

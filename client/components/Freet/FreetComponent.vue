@@ -97,11 +97,118 @@
         {{ tag }}
       </router-link>
     </div>
+    <small class="text-secondary">
+      <p class="info mt-3">
+        Last modified {{ freet.dateModified }}
+        <i v-if="freet.dateModified !== freet.dateCreated">(edited)</i>
+      </p>
+    </small>
     <hr/>
-    <small class="text-secondary"><p class="info">
-      Last modified {{ freet.dateModified }}
-      <i v-if="freet.dateModified !== freet.dateCreated">(edited)</i>
-    </p></small>
+    <div>
+      <span class="mr-4">
+        <i 
+          v-if="!hasUpvoted && !hasDownvoted"
+          class="bi bi-hand-thumbs-up mr-1 open"
+          @click="submitVote(true)"
+        >
+        </i>
+        <span v-else>
+          <i 
+            v-if="hasUpvoted"
+            class="bi bi-hand-thumbs-up mr-1 upvoted"
+            @click="removeVote()"
+          >
+          </i>
+          <i 
+            v-else
+            class="bi bi-hand-thumbs-up mr-1 closed"
+          >
+          </i>
+        </span>
+        {{ numUpvotes }}
+      </span>
+      <span class="mr-4">
+        <i 
+          v-if="!hasUpvoted && !hasDownvoted"
+          class="bi bi-hand-thumbs-down mr-1 open"
+          @click="submitVote(false)"
+        >
+        </i>
+        <span v-else>
+          <i 
+            v-if="hasDownvoted"
+            class="bi bi-hand-thumbs-down mr-1 downvoted"
+            @click="removeVote()"
+          >
+          </i>
+          <i 
+            v-else
+            class="bi bi-hand-thumbs-down mr-1 closed"
+          >
+          </i>
+        </span>
+        {{ numDownvotes }}
+      </span>
+      <button
+        class="btn btn-link float-right"
+        data-toggle="modal" 
+        :data-target="'#' + freet._id"
+      >
+        View reference links
+      </button>
+    </div>
+    <form 
+      class="input-group mt-3"
+      @submit.prevent="addReferenceLink()"
+    >
+      <input
+        class="form-control"
+        type="url"
+        placeholder="Add reference link..."
+        :value="link"
+        @input="link = $event.target.value"
+      >
+      <button
+        type="submit"
+        class="btn btn-info input-group-append px-4"
+      >
+        Add
+      </button>
+    </form>
+
+    <!-- Modal -->
+    <div class="modal fade" :id="freet._id" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Reference Links</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p
+              v-if="!freet.links.length"
+            >
+              There are currently no reference links for this freet.
+            </p>
+            <div v-else>
+              <p
+                v-for="link in freet.links"
+                :key="link._id"
+              >
+                <a
+                  class="btn btn-link refLink"
+                  :href="link.link"
+                >
+                  {{ link.link }}
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </article>
 </template>
 
@@ -120,8 +227,23 @@ export default {
       editing: false, // Whether or not this freet is in edit mode
       draft: this.freet.content, // Potentially-new content for this freet
       draftTags: [...this.freet.tags],
-      draftTag: ''
+      draftTag: '',
+      link: ''
     };
+  },
+  computed: {
+    numUpvotes() {
+      return this.freet.upvotes.length;
+    },
+    numDownvotes() {
+      return this.freet.downvotes.length;
+    },
+    hasUpvoted() {
+      return this.freet.upvotes.includes(this.$store.state.username);
+    },
+    hasDownvoted() {
+      return this.freet.downvotes.includes(this.$store.state.username);
+    }
   },
   methods: {
     addTag(tag) {
@@ -145,6 +267,85 @@ export default {
     removeTag(tag) {
       const index = this.draftTags.indexOf(tag);
       if (index !== -1) this.draftTags.splice(index, 1);
+    },
+    async submitVote(credible) {
+      try {
+        const options = {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          credentials: 'same-origin', // Sends express-session credentials with request
+          body: JSON.stringify({credible: credible})
+        }
+
+        const url = `/api/credibility/${this.freet._id}/votes`
+        const r = await fetch(url, options);
+        const res = await r.json();
+
+        if (!r.ok) {
+          throw new Error(res.error);
+        }
+
+        this.$store.commit('refreshFreets');
+      } catch (e) {
+        this.$store.commit('alert', {
+          message: e, 
+          status: 'danger'
+        });
+      }
+    },
+    async removeVote() {
+      try {
+        const options = {
+          method: 'DELETE',
+          headers: {'Content-Type': 'application/json'},
+          credentials: 'same-origin', // Sends express-session credentials with request
+        }
+
+        const url = `/api/credibility/${this.freet._id}/votes`
+        const r = await fetch(url, options);
+        const res = await r.json();
+
+        if (!r.ok) {
+          throw new Error(res.error);
+        }
+
+        this.$store.commit('refreshFreets');
+      } catch (e) {
+        this.$store.commit('alert', {
+          message: e, 
+          status: 'danger'
+        });
+      }
+    },
+    async addReferenceLink() {
+      try {
+        const options = {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          credentials: 'same-origin', // Sends express-session credentials with request
+          body: JSON.stringify({link: this.link})
+        }
+
+        const url = `/api/credibility/${this.freet._id}/links`
+        const r = await fetch(url, options);
+        const res = await r.json();
+
+        if (!r.ok) {
+          throw new Error(res.error);
+        }
+
+        this.$store.commit('refreshFreets');
+        this.$store.commit('alert', {
+          message: 'Successfully added a reference link!', 
+          status: 'success'
+        });
+        this.link = '';
+      } catch (e) {
+        this.$store.commit('alert', {
+          message: e, 
+          status: 'danger'
+        });
+      }
     },
     startEditing() {
       /**
@@ -253,5 +454,33 @@ a {
 
 .badge-pill {
   color: white;
+}
+
+.refLink {
+  color: #007bff;
+}
+
+.open:hover {
+  color: #007bff;
+}
+
+.upvoted {
+  color: green;
+}
+
+.upvoted:hover {
+  color: darkgreen;
+}
+
+.downvoted {
+  color: red;
+}
+
+.downvoted:hover {
+  color: darkred;
+}
+
+.closed {
+  color: gray;
 }
 </style>

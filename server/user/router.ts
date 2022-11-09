@@ -2,11 +2,11 @@ import type {Request, Response} from 'express';
 import express from 'express';
 import UserCollection from './collection';
 import FreetCollection from '../freet/collection';
-import {VoteCollection, ReferenceLinkCollection} from '../factcheck/collection';
 import FollowCollection from '../follow/collection';
 import FilterCollection from '../filter/collection';
 import * as userValidator from '../user/middleware';
 import * as util from './util';
+import {Types} from 'mongoose';
 
 const router = express.Router();
 
@@ -171,8 +171,6 @@ router.delete(
     const freets = await FreetCollection.findAllByUsername(username);
     for (const freet of freets) {
       promises.push(FreetCollection.deleteOne(freet._id));
-      promises.push(VoteCollection.deleteManyByFreetId(freet._id));
-      promises.push(ReferenceLinkCollection.deleteManyByFreetId(freet._id));
     }
 
     await Promise.all(promises);
@@ -181,8 +179,8 @@ router.delete(
     await FollowCollection.deleteManyByUserId(userId);
 
     // Delete votes and links issued by user.
-    await VoteCollection.deleteManyByUserId(userId);
-    await ReferenceLinkCollection.deleteManyByUserId(userId);
+    await FreetCollection.deleteVotesByUserId(new Types.ObjectId(userId));
+    await FreetCollection.deleteLinksByUserId(new Types.ObjectId(userId));
 
     // Delete filters by user, and any filters user appears in.
     await FilterCollection.deleteAllByUserId(userId);

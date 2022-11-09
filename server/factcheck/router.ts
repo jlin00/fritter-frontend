@@ -1,32 +1,12 @@
-import type {NextFunction, Request, Response} from 'express';
+import type {Request, Response} from 'express';
+import {Types} from 'mongoose';
 import express from 'express';
 import * as factCheckValidator from './middleware';
 import * as freetValidator from '../freet/middleware';
 import * as userValidator from '../user/middleware';
-import * as util from './util';
-import {VoteCollection, ReferenceLinkCollection} from './collection';
+import FreetCollection from '../freet/collection';
 
 const router = express.Router();
-
-/**
- * Get votes for a freet.
- *
- * @name GET /api/credibility/:freetId/votes
- *
- * @return {VoteResponse[]} - The credibility votes of a given freet
- * @throws {404} - If the freetId is not valid
- */
-router.get(
-  '/:freetId/votes',
-  [
-    freetValidator.isFreetExists
-  ],
-  async (req: Request, res: Response) => {
-    const votes = await VoteCollection.findAllByFreetId(req.params.freetId);
-    const response = votes.map(util.constructVoteResponse);
-    res.status(200).json(response);
-  }
-);
 
 /**
  * Add a new credibility vote to given freet.
@@ -48,11 +28,10 @@ router.post(
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    const vote = await VoteCollection.addOne(req.params.freetId, userId, req.body.credible);
+    await FreetCollection.addVote(new Types.ObjectId(req.params.freetId), new Types.ObjectId(userId), req.body.credible);
 
     res.status(201).json({
       message: 'Your vote was issued successfully.',
-      vote: util.constructVoteResponse(vote)
     });
   }
 );
@@ -75,31 +54,11 @@ router.delete(
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    await VoteCollection.deleteOne(req.params.freetId, userId);
+    await FreetCollection.removeVote(new Types.ObjectId(req.params.freetId), new Types.ObjectId(userId));
 
     res.status(200).json({
       message: 'Your vote was deleted successfully.'
     });
-  }
-);
-
-/**
- * Get reference links for a freet.
- *
- * @name GET /api/credibility/:freetId/links
- *
- * @return {ReferenceLinkResponse[]} - The reference links of a given freet
- * @throws {404} - If the freetId is not valid
- */
-router.get(
-  '/:freetId/links',
-  [
-    freetValidator.isFreetExists
-  ],
-  async (req: Request, res: Response) => {
-    const refLinks = await ReferenceLinkCollection.findAllByFreetId(req.params.freetId);
-    const response = refLinks.map(util.constructReferenceLinkResponse);
-    res.status(200).json(response);
   }
 );
 
@@ -123,11 +82,10 @@ router.post(
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    const refLink = await ReferenceLinkCollection.addOne(req.params.freetId, userId, req.body.link);
+    await FreetCollection.addLink(new Types.ObjectId(req.params.freetId), new Types.ObjectId(userId), req.body.link);
 
     res.status(201).json({
-      message: 'Your reference link was added successfully.',
-      refLink: util.constructReferenceLinkResponse(refLink)
+      message: 'Your reference link was added successfully.'
     });
   }
 );
@@ -135,21 +93,21 @@ router.post(
 /**
  * Delete a reference link from given freet
  *
- * @name DELETE /api/credibility/links/:linkId
+ * @name DELETE /api/credibility/:freetId/links/:linkId
  *
  * @return {string} - A success message
  * @throws {403} - If the user is not logged in or user is not the issuer of the reference link
- * @throws {404} - If the linkId is not valid
+ * @throws {404} - If freetId, linkId is not valid
  */
 router.delete(
-  '/links/:linkId',
+  '/:freetId/links/:linkId',
   [
     userValidator.isUserLoggedIn,
     factCheckValidator.isReferenceLinkExists,
     factCheckValidator.isValidReferenceLinkModifier
   ],
   async (req: Request, res: Response) => {
-    await ReferenceLinkCollection.deleteOne(req.params.linkId);
+    await FreetCollection.removeLink(new Types.ObjectId(req.params.freetId), new Types.ObjectId(req.params.linkId));
 
     res.status(200).json({
       message: 'Your reference link was deleted successfully.'

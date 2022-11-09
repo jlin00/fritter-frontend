@@ -10,6 +10,14 @@ type FreetResponse = {
   content: string;
   dateModified: string;
   tags: string[];
+  upvotes: string[];
+  downvotes: string[];
+  links: LinkResponse[];
+};
+
+type LinkResponse = {
+  issuerId: string;
+  link: string;
 };
 
 /**
@@ -35,13 +43,20 @@ const constructFreetResponse = (freet: HydratedDocument<Freet>): FreetResponse =
   };
   const {username} = freetCopy.authorId;
   delete freetCopy.authorId;
+
   return {
     ...freetCopy,
     _id: freetCopy._id.toString(),
     author: username,
     dateCreated: formatDate(freet.dateCreated),
     dateModified: formatDate(freet.dateModified),
-    tags: freetCopy.tags.map(t => t.tag)
+    tags: freetCopy.tags.map(t => t.tag),
+    upvotes: freetCopy.upvotes.map(u => u.username),
+    downvotes: freetCopy.downvotes.map(d => d.username),
+    links: freetCopy.links.map(l => ({
+      issuerId: l.issuerId.username,
+      link: l.link
+    }))
   };
 };
 
