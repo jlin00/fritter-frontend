@@ -11,7 +11,7 @@ export default {
       url: '/api/users/session',
       method: 'DELETE',
       setUsername: true,
-      title: 'Sign out',
+      title: 'Sign Out',
       fields: [],
       content: 'Taking a break? See you later.',
       callback: () => {
@@ -29,5 +29,10 @@ export default {
 button {
   border: #6c757d;
   background-color: #6c757d;
+}
+
+button:hover {
+  border: #545b62;
+  background-color: #5a6268;
 }
 </style>

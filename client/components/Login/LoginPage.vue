@@ -11,7 +11,7 @@
     </section>
     <section>
       <header>
-        <h2>Have an account?</h2>
+        <h2>Have an Account?</h2>
       </header>
       <LoginForm />
     </section>

@@ -9,10 +9,10 @@ Vue.use(Vuex);
  */
 const store = new Vuex.Store({
   state: {
-    filter: null, // Username to filter shown freets by (null = show all)
     freets: [], // All freets created in the app
-    username: null, // Username of the logged in user
-    alerts: {} // global success/error messages encountered during submissions to non-visible forms
+    alerts: {}, // global success/error messages encountered during submissions to non-visible forms,
+    username: null, // Username of the logged in user,
+    following: [], // Following of logged in user
   },
   mutations: {
     alert(state, payload) {
@@ -31,13 +31,13 @@ const store = new Vuex.Store({
        */
       state.username = username;
     },
-    updateFilter(state, filter) {
-      /**
-       * Update the stored freets filter to the specified one.
-       * @param filter - Username of the user to filter freets by
-       */
-      state.filter = filter;
-    },
+    // updateFilter(state, filter) {
+    //   /**
+    //    * Update the stored freets filter to the specified one.
+    //    * @param filter - Username of the user to filter freets by
+    //    */
+    //   state.filter = filter;
+    // },
     updateFreets(state, freets) {
       /**
        * Update the stored freets to the provided freets.
@@ -45,13 +45,23 @@ const store = new Vuex.Store({
        */
       state.freets = freets;
     },
+    updateFollowing(state, following) {
+      state.following = following;
+    },
     async refreshFreets(state) {
       /**
        * Request the server for the currently available freets.
        */
-      const url = state.filter ? `/api/freets?author=${state.filter}` : '/api/freets';
+      const url = '/api/freets';
       const res = await fetch(url).then(async r => r.json());
       state.freets = res;
+    },
+    async refreshFollowing(state) {
+      if (state.username) {
+        const url = `/api/follow?followingOf=${state.username}`;
+        const res = await fetch(url).then(async r => r.json());
+        state.following = res;
+      }
     }
   },
   // Store data across page refreshes, only discard on browser close

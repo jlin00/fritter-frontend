@@ -51,7 +51,7 @@
         to="/login"
       >
         <i class="bi bi-person-circle mx-2"></i>
-        <span class="fs-4">Login</span>
+        <span class="fs-4">Sign In</span>
       </router-link>
     </div>
   </div>
@@ -59,7 +59,7 @@
 
 <style scoped>
 img {
-    height: 40px;
+    height: 36px;
 }
 
 .sidebar {

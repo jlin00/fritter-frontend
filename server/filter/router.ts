@@ -177,7 +177,7 @@ const searchRouter = express.Router();
 /**
  * Get freets matching parameters.
  *
- * @name GET /api/freets?authors=usernames&tags=tags
+ * @name GET /api/content?usernames=usernames&tags=tags
  *
  * @return {FreetResponse[]} - An array of freets matching the parameters
  * @throws {400} - If usernames or tags is not given

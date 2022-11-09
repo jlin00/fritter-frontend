@@ -112,8 +112,10 @@ class FreetCollection {
     */
   static async filter(authors: Types.ObjectId[] | string[], tags: Types.ObjectId[] | string[]): Promise<Array<HydratedDocument<Freet>>> {
     return FreetModel.find({
-      authorId: {$in: authors},
-      tags: {$in: tags}
+      $or: [
+        {authorId: {$in: authors}},
+        {tags: {$in: tags}}
+      ]
     }).sort({dateModified: -1}).populate(['authorId', 'tags']);
   }
 }

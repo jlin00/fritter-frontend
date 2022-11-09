@@ -2,51 +2,36 @@
 
 <template>
   <main>
+    <QuickFilterForm />
     <section v-if="$store.state.username">
       <header>
-        <h1>Welcome @{{ $store.state.username }}!</h1>
+        <p class="display-4">Welcome @{{ $store.state.username }}!</p>
       </header>
       <CreateFreetForm />
     </section>
     <section v-else>
       <header>
-        <h2>Welcome to Fritter!</h2>
+        <p class="display-4">Welcome to Fritter!</p>
       </header>
       <article>
         <h3>
-          <router-link to="/login">
-            Sign in
-          </router-link>
-          to create, edit, and delete freets.
+          <i>
+            <router-link to="/login">
+              Sign in
+            </router-link>
+            to create, edit, and delete freets.
+          </i>
         </h3>
       </article>
     </section>
     <hr/>
     <section>
-      <header>
-        <div class="left">
-          <h2>
-            Viewing all freets
-            <span v-if="$store.state.filter">
-              by @{{ $store.state.filter }}
-            </span>
-          </h2>
-        </div>
-        <div class="right">
-          <GetFreetsForm
-            ref="getFreetsForm"
-            value="author"
-            placeholder="🔍 Filter by author (optional)"
-            button="Search"
-          />
-        </div>
-      </header>
       <section
         v-if="$store.state.freets.length"
       >
         <FreetComponent
           v-for="freet in $store.state.freets"
-          :key="freet.id"
+          :key="freet._id"
           :freet="freet"
         />
       </section>
@@ -62,14 +47,28 @@
 <script>
 import FreetComponent from '@/components/Freet/FreetComponent.vue';
 import CreateFreetForm from '@/components/Freet/CreateFreetForm.vue';
-import GetFreetsForm from '@/components/Freet/GetFreetsForm.vue';
+import QuickFilterForm from '@/components/Filter/QuickFilterForm.vue';
 
 export default {
   name: 'FreetPage',
-  components: {FreetComponent, GetFreetsForm, CreateFreetForm},
-  mounted() {
-    this.$refs.getFreetsForm.submit();
-  }
+  components: {FreetComponent, CreateFreetForm, QuickFilterForm},
+  async mounted() {
+    const url = '/api/freets';
+
+    try {
+      const r = await fetch(url);
+      const res = await r.json();
+      if (!r.ok) {
+        throw new Error(res.error);
+      }
+      this.$store.commit('updateFreets', res);
+    } catch (e) {
+      this.$store.commit('alert', {
+          message: e, 
+          status: 'danger'
+        });
+    }
+  },
 };
 </script>
 

@@ -11,7 +11,7 @@ export default {
       url: '/api/users',
       method: 'DELETE',
       setUsername: true,
-      title: 'Delete account',
+      title: 'Delete Account',
       fields: [],
       content: 'Deleting your account is permanent and irreversible. Proceed only if you understand these consequences.',
       callback: () => {
@@ -29,5 +29,10 @@ export default {
 button {
   border: #dc3545;
   background-color: #dc3545;
+}
+
+button:hover {
+  border: #bd2130;
+  background-color: #c82333;
 }
 </style>

@@ -15,7 +15,7 @@ export default {
       fields: [
         {id: 'username', label: 'Username', value: ''}
       ],
-      title: 'Change username',
+      title: 'Change Username',
       callback: () => {
         const message = 'Successfully changed username!';
         this.$store.commit('alert', {

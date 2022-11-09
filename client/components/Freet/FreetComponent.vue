@@ -21,14 +21,14 @@
           v-if="editing"
           @click="submitEdit"
         >
-          Save changes
+          Save Changes
         </button>
         <button
           class="btn btn-danger btn-sm my-2 mr-2 bi bi-x"
           v-if="editing"
           @click="stopEditing"
         >
-          Discard changes
+          Discard Changes
         </button>
         <button 
           class="btn btn-primary btn-sm my-2 mr-2 bi bi-pencil"
@@ -51,6 +51,7 @@
     >
       <i>Content:</i><textarea
         class="form-control content mb-2"
+        placeholder="What's on your mind?"
         :value="draft"
         @input="draft = $event.target.value"
       />
@@ -68,7 +69,7 @@
       <input
         class="form-control"
         :value="draftTag"
-        placeholder="Type tag and press enter"
+        placeholder="Type tag and press enter..."
         @input="draftTag = $event.target.value"
         @keydown.enter.prevent="event => {
           addTag(draftTag);

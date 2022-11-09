@@ -14,7 +14,9 @@
         >
           {{ alert }}
         </div>
-        <router-view />
+        <section class="body">
+          <router-view />
+        </section>
       </div>
     </div>
   </div>
@@ -55,7 +57,7 @@ body {
   font-size: 1.2em;
 }
 
-main {
-  padding: 3em 5em;
+.body {
+  padding: 2em 5em;
 }
 </style>

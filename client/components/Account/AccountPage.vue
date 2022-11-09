@@ -5,7 +5,7 @@
   <main>
     <section>
       <header>
-        <h2>Account settings for @{{ $store.state.username }}</h2>
+        <h2>Account Settings</h2>
       </header>
       <div class="row">
         <div class="col-6">
@@ -19,7 +19,7 @@
     <br/><br/>
     <section>
       <header>
-        <h2>Account management</h2>
+        <h2>Account Management</h2>
       </header>
       <div class="row">
         <div class="col-6">
