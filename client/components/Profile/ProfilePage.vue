@@ -45,7 +45,7 @@
         <div class="tab-content" id="nav-tabContent">
           <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
             <FreetComponent
-              v-for="freet in freets"
+              v-for="freet in $store.state.freets"
               :key="freet._id"
               :freet="freet"
             />
@@ -100,7 +100,6 @@ export default {
   components: {FreetComponent, UserComponent, TagComponent},
   data() {
     return {
-      freets: [],
       followers: [],
       following: [],
       fetching: true,
@@ -109,12 +108,19 @@ export default {
   },
   watch: {
     async $route() {
+      this.$store.commit('updateParams', null);
+      this.$store.commit('updateViewing', this.$route.params.username);
+      this.$store.commit('updateFilter', null);
+      
       this.fetching = true;
       await this.fetchData();
       this.fetching = false;
     }
   },
   async created() {
+    this.$store.commit('updateParams', null);
+    this.$store.commit('updateViewing', this.$route.params.username);
+    this.$store.commit('updateFilter', null);
     await this.fetchData();
   },
   methods: {
@@ -159,7 +165,7 @@ export default {
         if (!r.ok) {
           throw new Error(res.error);
         }
-        this.freets = res;
+        this.$store.commit('updateFreets', res);
 
         // Get followers of requested user 
         url = `/api/follow?followersOf=${this.$route.params.username}`

@@ -14,6 +14,9 @@ const store = new Vuex.Store({
     username: null, // Username of the logged in user,
     following: [], // Following of logged in user
     filters: [], // Filters of logged in user
+    filter: null,
+    params: null,
+    viewing: null,
   },
   mutations: {
     alert(state, payload) {
@@ -41,15 +44,36 @@ const store = new Vuex.Store({
     },
     updateFilters(state, filters) {
       state.filters = filters;
+    }, 
+    updateFilter(state, filter) {
+      state.filter = filter;
+    },
+    updateParams(state, params) {
+      state.params = params;
     },
     updateFollowing(state, following) {
       state.following = following;
+    },
+    updateViewing(state, viewing) {
+      state.viewing = viewing
     },
     async refreshFreets(state) {
       /**
        * Request the server for the currently available freets.
        */
-      const url = '/api/freets';
+      let url;
+      if (state.params) {
+        const username = state.params.select === 'user' ? state.params.value : '';
+        const tag = state.params.select === 'tag' ? state.params.value : '';
+        url = `/api/content?usernames=${username}&tags=${tag}`
+      } else if (state.filter) {
+        url = `/api/content?name=${state.filter}`
+      } else if (state.viewing) {
+        url = `/api/freets?author=${state.viewing}`
+      } else {
+        url = '/api/filters'
+      }
+
       const res = await fetch(url).then(async r => r.json());
       state.freets = res;
     },

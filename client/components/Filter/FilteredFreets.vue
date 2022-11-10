@@ -1,7 +1,7 @@
 <template>
   <div>
     <FreetComponent
-      v-for="freet in freets"
+      v-for="freet in $store.state.freets"
       :key="freet._id"
       :freet="freet"
     />
@@ -13,13 +13,12 @@ import FreetComponent from '@/components/Freet/FreetComponent.vue';
 export default {
   name: 'FilteredFreets',
   components: {FreetComponent},
-  data() {
-    return {
-        freets: []
-    }
-  },
   async mounted() {
     const url = `/api/content?name=${this.$route.params.filter}`;
+
+    this.$store.commit('updateParams', null);
+    this.$store.commit('updateViewing', null);
+    this.$store.commit('updateFilter', this.$route.params.filter);
     
     try {
       const r = await fetch(url);
@@ -29,7 +28,7 @@ export default {
         throw new Error(res.error);
       }
 
-      this.freets = res;
+      this.$store.commit('updateFreets', res);
     } catch (e) {
       this.$store.commit('alert', {
         message: e, 

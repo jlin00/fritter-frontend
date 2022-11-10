@@ -55,6 +55,10 @@ export default {
   async mounted() {
     const url = '/api/freets';
 
+    this.$store.commit('updateViewing', null);
+    this.$store.commit('updateFilter', null);
+    this.$store.commit('updateParams', null);
+
     try {
       const r = await fetch(url);
       const res = await r.json();

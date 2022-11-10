@@ -43,7 +43,7 @@
         <div class="tab-content" id="nav-tabContent">
           <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
             <FreetComponent
-              v-for="freet in freets"
+              v-for="freet in $store.state.freets"
               :key="freet._id"
               :freet="freet"
             />
@@ -62,19 +62,25 @@ export default {
   components: {FreetComponent},
   data() {
     return {
-      freets: [],
       fetching: true,
       id: null,
     }
   },
   watch: {
     async $route() {
+      this.$store.commit('updateParams', { value: this.$route.params.tag, select: 'tag' });
+      this.$store.commit('updateViewing', null);
+      this.$store.commit('updateFilter', null);
+      
       this.fetching = true;
       await this.fetchData();
       this.fetching = false;
     }
   },
   async created() {
+    this.$store.commit('updateParams', { value: this.$route.params.tag, select: 'tag' });
+    this.$store.commit('updateViewing', null);
+    this.$store.commit('updateFilter', null);
     await this.fetchData();
   },
   methods: {
@@ -119,7 +125,7 @@ export default {
         if (!r.ok) {
           throw new Error(res.error);
         }
-        this.freets = res;
+        this.$store.commit('updateFreets', res);
 
         this.fetching = false;
       } catch (e) {

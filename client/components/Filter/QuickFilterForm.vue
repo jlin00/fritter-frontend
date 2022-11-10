@@ -52,6 +52,14 @@ export default {
       };
 
       try {
+        if (this.value === '') {
+          throw new Error("Query can't be empty!");
+        }
+
+        this.$store.commit('updateParams', { value: this.value, select: this.select });
+        this.$store.commit('updateViewing', null);
+        this.$store.commit('updateFilter', null);
+        
         const username = this.select === 'user' ? this.value : '';
         const tag = this.select === 'tag' ? this.value : '';
         const url = `/api/content?usernames=${username}&tags=${tag}`
