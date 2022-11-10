@@ -5,6 +5,8 @@ import AccountPage from './components/Account/AccountPage.vue';
 import LoginPage from './components/Login/LoginPage.vue';
 import ProfilePage from './components/Profile/ProfilePage.vue';
 import TagPage from './components/Profile/TagPage.vue';
+import FilterPage from './components/Filter/FilterPage.vue';
+import FilteredFreets from './components/Filter/FilteredFreets.vue';
 import NotFound from './NotFound.vue';
 
 Vue.use(VueRouter);
@@ -15,6 +17,8 @@ const routes = [
   {path: '/login', name: 'Login', component: LoginPage},
   {path: '/users/:username', name: 'Profile', component: ProfilePage},
   {path: '/tags/:tag', name: 'Tag', component: TagPage},
+  {path: '/filters', name: 'Filter', component: FilterPage},
+  {path: '/filters/:filter', name: 'FilteredFreets', component: FilteredFreets},
   {path: '*', name: 'Not Found', component: NotFound}
 ];
 

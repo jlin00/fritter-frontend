@@ -13,7 +13,7 @@
       <div
         v-for="field in fields"
         class="mb-2"
-        :key="field.id"
+        :key="field.label"
       >
         <label :for="field.id"><i>{{ field.label }}:</i></label>
         <textarea
@@ -90,6 +90,8 @@ export default {
       hasBody: false, // Whether or not form request has a body
       setUsername: false, // Whether or not stored username should be updated after form submission
       refreshFreets: false, // Whether or not stored freets should be updated after form submission
+      refreshFilters: false, // Whether or not stored filters should be updated after form submission
+      keepFields: false, // Whether or not to reset fields after submission
       callback: null // Function to run after successful form submission
     };
   },
@@ -131,11 +133,11 @@ export default {
             const {id} = field;
             if (id === 'collection') {
               const {collectionName, collection} = field;
-              field.collection = [];
+              if (!this.keepFields) field.collection = [];
               return [collectionName, collection];
             } else {
               const {value} = field;
-              field.value = '';
+              if (!this.keepFields) field.value = '';
               return [id, value]
             }
           })
@@ -159,6 +161,10 @@ export default {
 
         if (this.refreshFreets) {
           this.$store.commit('refreshFreets');
+        }
+
+        if (this.refreshFilters) {
+          this.$store.commit('refreshFilters');
         }
 
         if (this.callback) {

@@ -1,4 +1,4 @@
-import Vue from 'vue';
+ import Vue from 'vue';
 import Vuex from 'vuex';
 import createPersistedState from 'vuex-persistedstate';
 
@@ -13,6 +13,7 @@ const store = new Vuex.Store({
     alerts: {}, // global success/error messages encountered during submissions to non-visible forms,
     username: null, // Username of the logged in user,
     following: [], // Following of logged in user
+    filters: [], // Filters of logged in user
   },
   mutations: {
     alert(state, payload) {
@@ -31,19 +32,15 @@ const store = new Vuex.Store({
        */
       state.username = username;
     },
-    // updateFilter(state, filter) {
-    //   /**
-    //    * Update the stored freets filter to the specified one.
-    //    * @param filter - Username of the user to filter freets by
-    //    */
-    //   state.filter = filter;
-    // },
     updateFreets(state, freets) {
       /**
        * Update the stored freets to the provided freets.
        * @param freets - Freets to store
        */
       state.freets = freets;
+    },
+    updateFilters(state, filters) {
+      state.filters = filters;
     },
     updateFollowing(state, following) {
       state.following = following;
@@ -62,6 +59,11 @@ const store = new Vuex.Store({
         const res = await fetch(url).then(async r => r.json());
         state.following = res;
       }
+    },
+    async refreshFilters(state) {
+      const url = '/api/filters';
+      const res = await fetch(url).then(async r => r.json());
+      state.filters = res;
     }
   },
   // Store data across page refreshes, only discard on browser close

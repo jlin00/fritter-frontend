@@ -64,9 +64,9 @@ export default {
       this.$store.commit('updateFreets', res);
     } catch (e) {
       this.$store.commit('alert', {
-          message: e, 
-          status: 'danger'
-        });
+        message: e, 
+        status: 'danger'
+      });
     }
   },
 };
