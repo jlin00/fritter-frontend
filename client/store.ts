@@ -71,7 +71,7 @@ const store = new Vuex.Store({
       } else if (state.viewing) {
         url = `/api/freets?author=${state.viewing}`
       } else {
-        url = '/api/filters'
+        url = '/api/freets'
       }
 
       const res = await fetch(url).then(async r => r.json());
